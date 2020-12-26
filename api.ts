@@ -19,7 +19,12 @@ export class Request extends ServerRequest implements APIRequest {
         done: false
     }
 
-    constructor(req: ServerRequest, pathname: string, params: Record<string, string>, query: URLSearchParams) {
+    constructor(
+        req: ServerRequest,
+        pathname: string,
+        params: Record<string, string>,
+        query: URLSearchParams,
+    ) {
         super()
         this.conn = req.conn
         this.r = req.r
@@ -31,6 +36,9 @@ export class Request extends ServerRequest implements APIRequest {
         this.protoMajor = req.protoMajor
         this.headers = req.headers
         this.done = req.done
+        if (req.respond !== undefined) {
+            this.respond = req.respond;
+        }
         this.#pathname = pathname
         this.#params = params
         this.#query = query
