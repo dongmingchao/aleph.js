@@ -1,7 +1,6 @@
 import CleanCSS from 'https://esm.sh/clean-css@4.2.3?no-check'
 import marked from 'https://esm.sh/marked@1.2.0'
 import postcss, { AcceptedPlugin } from 'https://esm.sh/postcss@8.1.4'
-import { minify } from 'https://esm.sh/terser@5.3.2'
 import { safeLoadFront } from 'https://esm.sh/yaml-front-matter@4.1.0'
 import { Request } from './api.ts'
 import { EventEmitter } from './events.ts'
@@ -16,6 +15,13 @@ import util, { hashShort, MB, reHashJs, reHttp, reLocaleID, reMDExt, reModuleExt
 import { createHTMLDocument } from './vendor/deno-dom/document.ts'
 import less from './vendor/less/less.js'
 import { version } from './version.ts'
+
+async function minify(files: string | string[] | {
+    [file: string]: string;
+}, options?: import('https://esm.sh/terser@5.3.2').MinifyOptions | undefined): Promise<import('https://esm.sh/terser@5.3.2').MinifyOutput> {
+    const fn = await import('https://esm.sh/terser@5.3.2')
+    return fn.minify(files, options);
+}
 
 interface Module {
     id: string

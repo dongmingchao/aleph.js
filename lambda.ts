@@ -1,4 +1,5 @@
 ﻿import { APIGatewayProxyEventV2, APIGatewayProxyResult, Context } from "https://deno.land/x/lambda/mod.ts";
+import { fromPairs } from "https://x.nest.land/ramda@0.27.2/source/index.js";
 import { Request } from './api.ts';
 import { Project } from "./project.ts";
 import { handleRequest } from "./server.ts";
@@ -38,6 +39,9 @@ export async function handler(
     if (result.body instanceof Uint8Array) {
         ret.isBase64Encoded = true
         ret.body = encode(result.body)
+    }
+    if (result.headers) {
+        ret.headers = fromPairs(Array.from(result.headers.entries()))
     }
     return ret;
 }
