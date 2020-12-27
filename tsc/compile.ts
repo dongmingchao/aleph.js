@@ -1,5 +1,3 @@
-import reactRefreshTS from 'https://esm.sh/react-refresh-typescript@1.1.0?external=typescript@4.1.2'
-import ts from 'https://esm.sh/typescript@4.1.2'
 import transformImportPathRewrite from './transform-import-path-rewrite.ts'
 import transformReactJsx from './transform-react-jsx.ts'
 import transformReactUseDenoHook from './transform-react-use-deno-hook.ts'
@@ -22,13 +20,15 @@ const allowTargets = [
     'es2020',
 ]
 
-export function compile(fileName: string, source: string, { mode, target: targetName, rewriteImportPath, reactRefresh, signUseDeno }: CompileOptions) {
+export async function compile(fileName: string, source: string, { mode, target: targetName, rewriteImportPath, reactRefresh, signUseDeno }: CompileOptions) {
+    const { default: reactRefreshTS } = await import('https://esm.sh/react-refresh-typescript@1.1.0?external=typescript@4.1.2')
+    const { default: ts } = await import('https://esm.sh/typescript@4.1.2')
     const target = allowTargets.indexOf(targetName.toLowerCase())
-    const transformers: ts.CustomTransformers = { before: [], after: [] }
+    const transformers: import('https://esm.sh/typescript@4.1.2').CustomTransformers = { before: [], after: [] }
     if (reactRefresh) transformers.before!.push(reactRefreshTS())
-    transformers.before!.push(createPlainTransformer(transformReactJsx, { mode, rewriteImportPath }))
-    transformers.after!.push(createPlainTransformer(transformReactUseDenoHook, { index: 0, signUseDeno }))
-    transformers.after!.push(createPlainTransformer(transformImportPathRewrite, rewriteImportPath))
+    transformers.before!.push(createPlainTransformer(ts, transformReactJsx, { mode, rewriteImportPath }))
+    transformers.after!.push(createPlainTransformer(ts, transformReactUseDenoHook, { index: 0, signUseDeno }))
+    transformers.after!.push(createPlainTransformer(ts, transformImportPathRewrite, rewriteImportPath))
 
     return ts.transpileModule(source, {
         fileName,
@@ -50,9 +50,15 @@ export function compile(fileName: string, source: string, { mode, target: target
     })
 }
 
-function createPlainTransformer(transform: (sf: ts.SourceFile, node: ts.Node, ...args: any[]) => ts.VisitResult<ts.Node>, ...args: any[]): ts.TransformerFactory<ts.SourceFile> {
-    function nodeVisitor(ctx: ts.TransformationContext, sf: ts.SourceFile) {
-        const visitor: ts.Visitor = node => {
+function createPlainTransformer(
+    ts: typeof import('https://esm.sh/typescript@4.1.2'),
+    transform: (
+        sf: import('https://esm.sh/typescript@4.1.2').SourceFile,
+        node: import('https://esm.sh/typescript@4.1.2').Node,
+        ...args: any[]
+    ) => import('https://esm.sh/typescript@4.1.2').VisitResult<import('https://esm.sh/typescript@4.1.2').Node>, ...args: any[]): import('https://esm.sh/typescript@4.1.2').TransformerFactory<import('https://esm.sh/typescript@4.1.2').SourceFile> {
+    function nodeVisitor(ctx: import('https://esm.sh/typescript@4.1.2').TransformationContext, sf: import('https://esm.sh/typescript@4.1.2').SourceFile) {
+        const visitor: import('https://esm.sh/typescript@4.1.2').Visitor = node => {
             const ret = transform(sf, node, ...args)
             if (ret != null) {
                 return ret
@@ -65,6 +71,6 @@ function createPlainTransformer(transform: (sf: ts.SourceFile, node: ts.Node, ..
     return ctx => sf => ts.visitNode(sf, nodeVisitor(ctx, sf))
 }
 
-function createTransformer(transform: (ctx: ts.TransformationContext, sf: ts.SourceFile, options?: any) => ts.SourceFile, options?: Record<string, any>): ts.TransformerFactory<ts.SourceFile> {
-    return ctx => sf => transform(ctx, sf, options)
-}
+// function createTransformer(transform: (ctx: ts.TransformationContext, sf: ts.SourceFile, options?: any) => ts.SourceFile, options?: Record<string, any>): ts.TransformerFactory<ts.SourceFile> {
+//     return ctx => sf => transform(ctx, sf, options)
+// }

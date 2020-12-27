@@ -22,7 +22,7 @@ export async function handler(
         headers: new Headers(event.headers),
     } as ServerRequest;
     if (project === undefined) {
-        project = new Project(path.resolve('.'), 'production')
+        project = new Project(path.resolve('.'), 'development')
         await project.ready
     }
     const url = new URL('http://localhost/' + req.url)

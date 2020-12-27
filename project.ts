@@ -1125,7 +1125,7 @@ export class Project {
                         return sig
                     }
                 }
-                const { diagnostics, outputText, sourceMapText } = compile(mod.sourceFilePath, sourceCode, compileOptions)
+                const { diagnostics, outputText, sourceMapText } = await compile(mod.sourceFilePath, sourceCode, compileOptions)
                 if (diagnostics && diagnostics.length > 0) {
                     throw new Error(`compile ${url}: ${diagnostics.map(d => d.messageText).join('\n')}`)
                 }
